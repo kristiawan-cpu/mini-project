@@ -27,24 +27,26 @@ func DefaultRequestHandler(db *gorm.DB) *RequestHandler {
 	)
 }
 
-type CreateRequest struct {
-	Name string `json:"name" binding:"required"`
+type RegisterRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+	Role_ID  int    `json:"role_id" binding:"required"`
 }
 
 type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
-func (h RequestHandler) Create(c *gin.Context) {
-	var req CreateRequest
+func (h RequestHandler) Register(c *gin.Context) {
+	var req RegisterRequest
 
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
-	//
 
-	res, err := h.ctrl.Create(&req)
+	res, err := h.ctrl.Register(&req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
@@ -53,13 +55,34 @@ func (h RequestHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-// get-all
-func (h RequestHandler) GetAll(c *gin.Context) {
-	res, err := h.ctrl.GetAll()
+// creat customer
+type AddCustomerRequest struct {
+	Firstname string `json:"firstname" binding:"required"`
+	Lastname  string `json:"lastname" binding:"required"`
+	Email     string `json:"email" binding:"required"`
+	Avatar    string `json:"avatar" binding:"required"`
+}
+
+func (h RequestHandler) AddCustomer(c *gin.Context) {
+	var req AddCustomerRequest
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
+		return
+	}
+	res, err := h.ctrl.AddCustomer(&req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
+	c.JSON(http.StatusOK, res)
+}
 
+// get all customer
+func (h RequestHandler) GetAllCustomer(c *gin.Context) {
+	err, res := h.ctrl.GetAllCustomer()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: res.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, res)
 }

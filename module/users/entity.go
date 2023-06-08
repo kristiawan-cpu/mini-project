@@ -4,17 +4,28 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	Name        string
-	Collections []Collection
-}
-
-type Collection struct {
-	gorm.Model
-	UserID   uint
+	ID       uint
 	Username string
 	Password string
-	RoleID   int
+	RoleID   Role
 	Verified bool
 	Active   bool
-	User     User
+}
+
+type Role struct {
+	ID        int
+	Role_name string
+}
+type Customer struct {
+	ID        uint
+	Firstname string
+	Lastname  string
+	Email     string
+	Avatar    string
+}
+type RegisterApproval struct {
+	ID           User
+	AdminID      User
+	SuperAdminId User
+	Status       string
 }

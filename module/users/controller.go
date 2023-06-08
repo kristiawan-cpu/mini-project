@@ -10,64 +10,99 @@ func NewController(useCase *UseCase) *Controller {
 	}
 }
 
-type CreateResponse struct {
+type RegisterResponse struct {
 	Message string           `json:"message"`
 	Data    UserItemResponse `json:"data"`
 }
 
-type CollectionItemResponse struct {
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
-}
-
 type UserItemResponse struct {
-	ID          uint                     `json:"id"`
-	Name        string                   `json:"name"`
-	Collections []CollectionItemResponse `json:"collections"`
+	ID       uint   `json:"id"`
+	Username string `json:"usernme"`
+	Role_ID  int    `json:"role_id" `
 }
 
-func (c Controller) Create(req *CreateRequest) (*CreateResponse, error) {
-	user := User{Name: req.Name}
-	err := c.useCase.Create(&user)
+func (c Controller) Register(req *RegisterRequest) (*RegisterResponse, error) {
+	user := User{Username: req.Username,
+		Password: req.Password,
+		RoleID:   Role{ID: 2}}
+	err := c.useCase.Register(&user)
 	if err != nil {
 		return nil, err
 	}
-
-	res := &CreateResponse{
+	registerApproval := RegisterApproval{AdminID: User{ID: user.ID}}
+	if err1 := c.useCase.AddRegisterApproval(&registerApproval); err1 != nil {
+		return nil, err1
+	}
+	res := &RegisterResponse{
 		Message: "Success",
 		Data: UserItemResponse{
-			ID:   user.ID,
-			Name: user.Name,
+			ID:       user.ID,
+			Username: user.Username,
+			Role_ID:  user.RoleID.ID,
 		},
 	}
 
 	return res, nil
 }
 
-type GetResponse struct {
-	Data []UserItemResponse `json:"data"`
+// addCustomer
+type AddCustomerResponse struct {
+	Masage string
+	Data   CustomerItemResponse
+}
+type CustomerItemResponse struct {
+	ID        uint   `json:"id" binding:"required"`
+	Firstname string `json:"firstname" binding:"required"`
+	Lastname  string `json:"lastname" binding:"required"`
+	Email     string `json:"email" binding:"required"`
+	Avatar    string `json:"avatar" binding:"required"`
 }
 
-func (c Controller) GetAll() (*GetResponse, error) {
-	users, err := c.useCase.GetAll()
+func (c Controller) AddCustomer(req *AddCustomerRequest) (*AddCustomerResponse, error) {
+	customer := Customer{
+		Firstname: req.Firstname,
+		Lastname:  req.Lastname,
+		Email:     req.Email,
+		Avatar:    req.Avatar}
+	err := c.useCase.AddCustomer(&customer)
 	if err != nil {
 		return nil, err
 	}
-
-	res := &GetResponse{}
-	for _, user := range users {
-		item := UserItemResponse{
-			ID:   user.ID,
-			Name: user.Name,
-		}
-		for _, collection := range user.Collections {
-			item.Collections = append(item.Collections, CollectionItemResponse{
-				ID:   collection.ID,
-				Name: collection.Username,
-			})
-		}
-		res.Data = append(res.Data, item)
+	res := &AddCustomerResponse{
+		Masage: "Sukses",
+		Data: CustomerItemResponse{
+			ID:        customer.ID,
+			Firstname: customer.Firstname,
+			Lastname:  customer.Lastname,
+			Email:     customer.Email,
+			Avatar:    customer.Avatar,
+		},
 	}
-
 	return res, nil
+}
+
+type GetAllCustomerResponse struct {
+	Masage string
+	Data   []Customer
+}
+
+// GetAllCustomer
+func (c Controller) GetAllCustomer() (*GetAllCustomerResponse, error) {
+	customers, err := c.useCase.GetAllCustomer()
+	if err != nil {
+		return nil, err
+	}
+	res := &GetAllCustomerResponse{}
+	for _, customer := range customers {
+		item := CustomerItemResponse{
+			ID:        customer.ID,
+			Firstname: customer.Firstname,
+			Lastname:  customer.Lastname,
+			Email:     customer.Email,
+			Avatar:    customer.Avatar,
+		}
+		res.Data = append(res.Data, Customer(item))
+	}
+	return res, nil
+
 }

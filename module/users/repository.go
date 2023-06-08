@@ -1,25 +1,33 @@
 package users
 
-import (
-	"gorm.io/gorm"
-)
+import "gorm.io/gorm"
 
 type Repository struct {
 	db *gorm.DB
-}
-
-func (r Repository) Save(user *User) error {
-	return r.db.Create(user).Error
 }
 
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
-// find all
-func (r Repository) FindAll() ([]User, error) {
-	var users []User
-	err := r.db.Find(&users).Error
-	return users, err
+//register
+func (r Repository) Register(user *User) error {
+	return r.db.Create(user).Error
+}
 
+//addRegisterApproval
+func (r Repository) AddRegisterApproval(registerApproval *RegisterApproval) error {
+	return r.db.Create(registerApproval).Error
+}
+
+//addCustomer
+func (r Repository) AddCustomer(customer *Customer) error {
+	return r.db.Create(customer).Error
+}
+
+//GetAllCustomer
+func (r Repository) GetAllCustomer() ([]Customer, error) {
+	var customers []Customer
+	err := r.db.Find(&customers).Error
+	return customers, err
 }
