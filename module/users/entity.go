@@ -4,28 +4,27 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	ID       uint
 	Username string
 	Password string
-	RoleID   Role
-	Verified bool
-	Active   bool
+	RoleID   uint
+	//	Verified bool
+	//	Active   bool
 }
 
 type Role struct {
-	ID        int
+	Id        uint `gorm:"primary_key"`
 	Role_name string
 }
 type Customer struct {
-	ID        uint
+	gorm.Model
 	Firstname string
 	Lastname  string
 	Email     string
 	Avatar    string
 }
 type RegisterApproval struct {
-	ID           User
-	AdminID      User
-	SuperAdminId User
+	Id           uint `gorm:"primary_key"`
+	AdminID      uint
+	SuperAdminId uint
 	Status       string
 }

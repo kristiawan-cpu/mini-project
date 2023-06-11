@@ -16,32 +16,57 @@ type RegisterResponse struct {
 }
 
 type UserItemResponse struct {
-	ID       uint   `json:"id"`
+	Id       uint   `json:"id"`
 	Username string `json:"usernme"`
-	Role_ID  int    `json:"role_id" `
+	Role_ID  uint   `json:"role_id" `
 }
 
 func (c Controller) Register(req *RegisterRequest) (*RegisterResponse, error) {
 	user := User{Username: req.Username,
 		Password: req.Password,
-		RoleID:   Role{ID: 2}}
+		RoleID:   2,
+	}
 	err := c.useCase.Register(&user)
 	if err != nil {
 		return nil, err
 	}
-	registerApproval := RegisterApproval{AdminID: User{ID: user.ID}}
+	registerApproval := RegisterApproval{AdminID: user.ID}
 	if err1 := c.useCase.AddRegisterApproval(&registerApproval); err1 != nil {
 		return nil, err1
 	}
 	res := &RegisterResponse{
 		Message: "Success",
 		Data: UserItemResponse{
-			ID:       user.ID,
+			Id:       user.ID,
 			Username: user.Username,
-			Role_ID:  user.RoleID.ID,
-		},
+			Role_ID:  user.RoleID},
 	}
 
+	return res, nil
+}
+
+// get all admin
+type GetAllAdminResponse struct {
+	GetAllAdminResponseMasage string             `json:"masage"`
+	GetAllAdminResponseData   []UserItemResponse `json:"data"`
+}
+
+func (c Controller) GetAllAdmin() (*GetAllAdminResponse, error) {
+	admins, err := c.useCase.GetAllAdmin()
+	if err != nil {
+		return nil, err
+	}
+	res := &GetAllAdminResponse{}
+	res.GetAllAdminResponseMasage = "succes"
+	for _, admin := range admins {
+		item := UserItemResponse{
+			Id:       admin.ID,
+			Username: admin.Username,
+			Role_ID:  admin.RoleID,
+		}
+
+		res.GetAllAdminResponseData = append(res.GetAllAdminResponseData, item)
+	}
 	return res, nil
 }
 
@@ -51,11 +76,11 @@ type AddCustomerResponse struct {
 	Data   CustomerItemResponse
 }
 type CustomerItemResponse struct {
-	ID        uint   `json:"id" binding:"required"`
-	Firstname string `json:"firstname" binding:"required"`
-	Lastname  string `json:"lastname" binding:"required"`
-	Email     string `json:"email" binding:"required"`
-	Avatar    string `json:"avatar" binding:"required"`
+	Id        uint   `json:"id"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Email     string `json:"email"`
+	Avatar    string `json:"avatar"`
 }
 
 func (c Controller) AddCustomer(req *AddCustomerRequest) (*AddCustomerResponse, error) {
@@ -71,7 +96,7 @@ func (c Controller) AddCustomer(req *AddCustomerRequest) (*AddCustomerResponse, 
 	res := &AddCustomerResponse{
 		Masage: "Sukses",
 		Data: CustomerItemResponse{
-			ID:        customer.ID,
+			Id:        customer.ID,
 			Firstname: customer.Firstname,
 			Lastname:  customer.Lastname,
 			Email:     customer.Email,
@@ -81,12 +106,11 @@ func (c Controller) AddCustomer(req *AddCustomerRequest) (*AddCustomerResponse, 
 	return res, nil
 }
 
+// GetAllCustomer
 type GetAllCustomerResponse struct {
-	Masage string
-	Data   []Customer
+	Data []CustomerItemResponse `json:"data"`
 }
 
-// GetAllCustomer
 func (c Controller) GetAllCustomer() (*GetAllCustomerResponse, error) {
 	customers, err := c.useCase.GetAllCustomer()
 	if err != nil {
@@ -95,14 +119,40 @@ func (c Controller) GetAllCustomer() (*GetAllCustomerResponse, error) {
 	res := &GetAllCustomerResponse{}
 	for _, customer := range customers {
 		item := CustomerItemResponse{
-			ID:        customer.ID,
+			Id:        customer.ID,
 			Firstname: customer.Firstname,
 			Lastname:  customer.Lastname,
 			Email:     customer.Email,
 			Avatar:    customer.Avatar,
 		}
-		res.Data = append(res.Data, Customer(item))
+
+		res.Data = append(res.Data, item)
+	}
+
+	return res, nil
+}
+
+// get by name and email
+type GetCustomerByNameAndEmailResponse struct {
+	MasageGetCustomerByNameAndEmail string               `json:"masage"`
+	DataGetCustomerByNameAndEmail   CustomerItemResponse `json:"data"`
+}
+
+func (c Controller) GetCustomerByNameAndEmail(req *GetCustomerByNameAndEmailRequest) (*GetCustomerByNameAndEmailResponse, error) {
+	parameterRequest := req
+	customer, err := c.useCase.GetCustomerByNameAndEmail(parameterRequest)
+	if err != nil {
+		return nil, err
+	}
+	res := &GetCustomerByNameAndEmailResponse{
+		MasageGetCustomerByNameAndEmail: "succes",
+		DataGetCustomerByNameAndEmail: CustomerItemResponse{
+			Id:        customer.ID,
+			Firstname: customer.Firstname,
+			Lastname:  customer.Lastname,
+			Email:     customer.Email,
+			Avatar:    customer.Avatar,
+		},
 	}
 	return res, nil
-
 }

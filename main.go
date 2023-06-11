@@ -1,7 +1,6 @@
 package main
 
 import (
-	"MINIPROJECT/module/admin"
 	"MINIPROJECT/module/users"
 	"log"
 
@@ -22,13 +21,12 @@ func main() {
 
 	r := gin.Default()
 	usersHandler := users.DefaultRequestHandler(db)
-	adminHandler := admin.DefaultRequestHandler(db)
 	//create user
-	r.POST("/users", usersHandler.Create)
+	r.POST("/user/customer/add-customer", usersHandler.AddCustomer)
 	//register admin
-	r.POST("/admin/register",adminHandler.Register)
-	//get all users
-	r.GET("/all-users", usersHandler.GetAll)
+	r.POST("/user/admin/register", usersHandler.Register)
+	//get all Customer
+	r.GET("/user/customer/all-customer", usersHandler.GetAllCustomer)
 	err = r.Run(":8080")
 	if err != nil {
 		log.Fatal(err)

@@ -15,6 +15,7 @@ func NewRequestHandler(ctrl *Controller) *RequestHandler {
 	return &RequestHandler{
 		ctrl: ctrl,
 	}
+
 }
 
 func DefaultRequestHandler(db *gorm.DB) *RequestHandler {
@@ -30,8 +31,6 @@ func DefaultRequestHandler(db *gorm.DB) *RequestHandler {
 type RegisterRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
-	Email    string `json:"email" binding:"required"`
-	Role_ID  int    `json:"role_id" binding:"required"`
 }
 
 type ErrorResponse struct {
@@ -52,6 +51,17 @@ func (h RequestHandler) Register(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, res)
+}
+
+//get all admin
+
+func (h RequestHandler) GetCustomerByNameAdnEmail(c *gin.Context) {
+	res, err := h.ctrl.GetAllAdmin()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, res)
 }
 
@@ -79,10 +89,32 @@ func (h RequestHandler) AddCustomer(c *gin.Context) {
 
 // get all customer
 func (h RequestHandler) GetAllCustomer(c *gin.Context) {
-	err, res := h.ctrl.GetAllCustomer()
+	res, err := h.ctrl.GetAllCustomer()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: res.Error()})
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, res)
 }
+
+// get customer by name and email
+type GetCustomerByNameAndEmailRequest struct {
+	Name  string `json:"name" binding:"required"`
+	Email string `json:"firstname" binding:"required"`
+}
+
+/*
+func (h RequestHandler) GetCustomerByNameAndEmail(c *gin.Context) {
+	var req GetCustomerByNameAndEmailRequest
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
+		return
+	}
+	res, err := h.ctrl.GetCustomerByNameAndEmail(&req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, res)
+}
+*/
